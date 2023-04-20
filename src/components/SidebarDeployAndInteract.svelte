@@ -1,0 +1,159 @@
+<script lang="ts">
+    import {
+        sidebarWidth,
+        deploying,
+        project,
+        consoleOpen,
+        availableInteractions,
+        availableTables,
+        senderAccount,
+        contractDeployedTo,
+        building,
+    } from "../stores";
+    import InteractableAction from "./InteractableAction.svelte";
+    import InteractableTable from "./InteractableTable.svelte";
+    import ApiService from "../services/Api.service";
+
+    let testAction = {
+        name:'test',
+        params:[
+            { type:'name', name:'account' },
+            { type:'uint64_t', name:'id' },
+        ],
+        value:'',
+    }
+
+    const deployContract = (build:boolean) => {
+        if($deploying) return;
+        if($building) return;
+        deploying.set(true);
+        consoleOpen.set(true);
+        ApiService.deploy($project, build);
+    }
+
+    const testAccounts = [
+        "testaccounta",
+        "testaccountb",
+        "testaccountc",
+        "testaccountd",
+        "testaccounte",
+    ];
+    let tempSenderAccount = testAccounts[0];
+    senderAccount.set(tempSenderAccount);
+
+    let copiedSender = false;
+    const copySenderAccount = () => {
+        copiedSender = true;
+        setTimeout(() => copiedSender = false, 1000);
+        navigator.clipboard.writeText($senderAccount);
+    }
+
+    let copiedContract = false;
+    const copyContractAccount = () => {
+        copiedContract = true;
+        setTimeout(() => copiedContract = false, 1000);
+        navigator.clipboard.writeText($contractDeployedTo);
+    }
+
+    const goToContractInExplorer = () => {
+        window.open(`https://jungle4.eosq.eosnation.io/account/${$contractDeployedTo}`, '_blank');
+    }
+</script>
+
+<aside class="flex flex-col bg-sidebarBg text-fontColor cursor-default" style="min-width:{$sidebarWidth}px">
+    <section class="flex flex-col flex-1 overflow-y-auto">
+        <figure class="text-xs font-medium opacity-30 p-5 pb-1">DEPLOY</figure>
+        <section class="flex-none p-5 pt-0">
+            <section class="pt-4">
+                <figure class="tiny-label text-fontColor">ENVIRONMENT</figure>
+                <select class="text-xs rounded bg-inputBg border-inputBorder border py-1 px-2 w-full mt-1">
+                    <option>Jungle Testnet</option>
+                    <option disabled>EOS Mainnet</option>
+                </select>
+
+                <!--            <figure class="tiny-label text-fontColor mt-4">CONTRACT ACCOUNT</figure>-->
+                <!--            <input class="text-xs cursor-not-allowed opacity-40 rounded bg-inputBg border-inputBorder border py-1 px-2 w-full mt-1" disabled value={"acc"} />-->
+
+                <figure on:click={() => deployContract(true)} class="mt-2 select-none rounded text-xs border-2 border-fontColor flex justify-start px-3 py-2 items-center
+                {!$deploying && !$building ? 'cursor-pointer' : ''}
+                {$deploying || $building ? 'opacity-30' : ''} {$deploying || $building ? 'opacity-30 cursor-not-allowed animate-pulse text-fontHighlight border-fontHighlight' : ''}
+                  hover:border-fontHighlight hover:text-fontHighlight active:bg-fontColor
+                  active:border-fontColor active:text-fontColorInverted"><i class="fa-solid fa-tools mr-1"></i> <i class="fa-solid fa-rocket-launch mr-3"></i> BUILD & DEPLOY</figure>
+
+                <figure on:click={() => deployContract(false)} class="mt-2 select-none rounded text-xs border-2 border-fontColor flex justify-start px-3 py-2 items-center
+                {!$deploying && !$building ? 'cursor-pointer' : ''}
+                {$deploying || $building ? 'opacity-30' : ''} {$deploying || $building ? 'opacity-30 cursor-not-allowed animate-pulse text-fontHighlight border-fontHighlight' : ''}
+                  hover:border-fontHighlight hover:text-fontHighlight active:bg-fontColor
+                  active:border-fontColor active:text-fontColorInverted"><i class="fa-solid fa-rocket-launch mr-3"></i> DEPLOY</figure>
+
+                {#if $contractDeployedTo}
+                    <figure class="tiny-label text-fontHighlight mt-5">The account the contract is deployed to</figure>
+                    <section class="flex">
+                        <figure class="text-xs rounded bg-inputBg border-inputBorder border py-1 px-2 w-full mt-1">{$contractDeployedTo}</figure>
+                        <figure on:click={goToContractInExplorer} class="text-xs rounded bg-inputBg border-fontColor border py-1 px-2 mt-1 hover:border-fontHighlight hover:text-fontHighlight active:bg-fontColor active:border-fontColor active:text-fontColorInverted cursor-pointer ml-1">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </figure>
+                        <figure on:click={copyContractAccount} class="text-xs rounded bg-inputBg border-fontColor border py-1 px-2 mt-1 hover:border-fontHighlight hover:text-fontHighlight active:bg-fontColor active:border-fontColor active:text-fontColorInverted cursor-pointer ml-1">
+                            <i class="fa-solid {copiedContract ? 'fa-check' : 'fa-copy'}"></i>
+                        </figure>
+                    </section>
+                {/if}
+
+            </section>
+        </section>
+
+        <section class="flex-none">
+            <figure class="h-px bg-fileBarUnselected my-2"></figure>
+
+            <section class="p-5 pb-2 pt-0 mt-3">
+                {#if $availableInteractions.length > 0}
+                    <figure class="tiny-label text-fontHighlight">Select account to send transactions with</figure>
+                    <section class="flex">
+                        <select bind:value={tempSenderAccount} on:change={() => senderAccount.set(tempSenderAccount)} class="text-xs rounded bg-inputBg border-inputBorder border py-1 px-2 w-full mt-1">
+                            {#each testAccounts as account}
+                                <option value={account}>{account}</option>
+                            {/each}
+                        </select>
+                        <figure on:click={copySenderAccount} class="text-xs rounded bg-inputBg border-fontColor border py-1 px-2 mt-1 hover:border-fontHighlight hover:text-fontHighlight active:bg-fontColor active:border-fontColor active:text-fontColorInverted cursor-pointer ml-1">
+                            <i class="fa-solid {copiedSender ? 'fa-check' : 'fa-copy'}"></i>
+                        </figure>
+                    </section>
+                {/if}
+            </section>
+        </section>
+
+        <section class="flex-auto">
+            <figure class="h-px bg-fileBarUnselected my-2"></figure>
+
+            <figure class="text-xs font-medium opacity-30 p-5 pt-3 pb-1">INTERACT WITH CONTRACT</figure>
+
+            <section class="p-5 pt-0 mt-3">
+                {#if $availableInteractions.length === 0}
+                    <figure class="text-xs text-center opacity-40">No actions available</figure>
+                {:else}
+                    {#each $availableInteractions as action}
+                        <InteractableAction action={action} />
+                        <!-- IF NOT LAST ELEMENT -->
+                        {#if $availableInteractions.length !== $availableInteractions.indexOf(action) + 1}
+                            <figure class="h-px bg-fileBarUnselected mb-5"></figure>
+                        {/if}
+                    {/each}
+                {/if}
+            </section>
+
+            <figure class="h-px bg-fileBarUnselected my-2"></figure>
+            <figure class="text-xs font-medium opacity-30 p-5 pt-3 pb-1">TABLES</figure>
+            <section class="p-5 pt-0 mt-3">
+                {#if $availableTables.length === 0}
+                    <figure class="text-xs text-center opacity-40">No tables available</figure>
+                {:else}
+                    {#each $availableTables as table}
+                        {#key table}
+                            <InteractableTable {table} />
+                        {/key}
+                    {/each}
+                {/if}
+            </section>
+        </section>
+    </section>
+</aside>
