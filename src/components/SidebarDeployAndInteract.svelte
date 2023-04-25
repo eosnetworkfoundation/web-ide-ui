@@ -110,7 +110,7 @@
                     <figure class="tiny-label text-fontHighlight">Select account to send transactions with</figure>
                     <section class="flex">
                         <select bind:value={tempSenderAccount} on:change={() => senderAccount.set(tempSenderAccount)} class="text-xs rounded bg-inputBg border-inputBorder border py-1 px-2 w-full mt-1">
-                            {#each testAccounts as account}
+                            {#each testAccounts.concat([$contractDeployedTo]) as account}
                                 <option value={account}>{account}</option>
                             {/each}
                         </select>
