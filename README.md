@@ -1,4 +1,4 @@
-# Overflow IDE
+# EOS Web IDE
 
 This is a web IDE for EOS smart contracts. 
 If you want to run this locally you need to run the [Web IDE API](https://github.com/eosnetworkfoundation/web-ide-api)
