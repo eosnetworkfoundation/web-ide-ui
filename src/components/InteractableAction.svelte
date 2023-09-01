@@ -1,10 +1,15 @@
 <script>
     import ApiService from "../services/Api.service";
-    import {contractDeployedTo} from "../stores";
+    import WalletService from "../services/Wallet.service";
+    import {consoleOpen, contractDeployedTo, selectedNetwork} from "../stores";
 
     export let action;
 
+    $: isOnMainnet = $selectedNetwork === "EOS Mainnet";
+
     const interact = async () => {
+        consoleOpen.set(true);
+
         const actionData = {
             action: action.name,
             params: action.params.reduce((acc, param) => {
@@ -12,6 +17,11 @@
                 return acc;
             }, {})
         };
+
+        if(isOnMainnet){
+            return WalletService.transact(actionData.action, actionData.params);
+        }
+
         ApiService.interact("jungle", $contractDeployedTo, actionData);
     }
 </script>

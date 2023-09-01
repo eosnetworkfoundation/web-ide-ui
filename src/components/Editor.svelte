@@ -21,6 +21,7 @@
     });
 
     addEventListener("resize", async (event) => {
+        if(!$editor) return;
         $editor.layout();
     });
 
@@ -32,7 +33,6 @@
             return p;
         });
 
-        console.log('saving')
         ApiService.save($project);
     }, 500);
 

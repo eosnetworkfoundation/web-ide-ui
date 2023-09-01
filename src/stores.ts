@@ -19,6 +19,7 @@ export const contractDeployedTo:Writable<string> = writable("");
 export const availableInteractions:Writable<Array<{name:string, params:Array<{name:string, type:string}>}>> = writable([]);
 export const availableTables:Writable<Array<{name:string}>> = writable([]);
 export const editor:Writable<any> = writable(null);
+export const selectedNetwork:Writable<string> = writable("Jungle Testnet");
 
 // UI SETTINGS
 export const sidebarWidth:Writable<number> = writable(300);
@@ -116,7 +117,6 @@ export const createNewFolder = () => {
 
         project.update(_project => {
             _project.files.push(new ProjectFile('.gitkeep', (file.path.length ? file.path+value+'/' : value+'/').replace(/([^:]\/)\/+/g, "$1"), ''));
-            console.log('_project', _project);
             ApiService.save(_project);
             return _project;
         });

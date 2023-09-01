@@ -1,6 +1,7 @@
 <script>
     import ApiService from "../services/Api.service";
-    import {contractDeployedTo} from "../stores";
+    import {consoleOpen, contractDeployedTo, selectedNetwork} from "../stores";
+    import WalletService from "../services/Wallet.service";
 
     export let table;
     let scope = $contractDeployedTo;
@@ -8,7 +9,14 @@
         scope = value;
     });
 
+    $: isOnMainnet = $selectedNetwork === "EOS Mainnet";
+
     const get = async () => {
+        consoleOpen.set(true);
+        if(isOnMainnet){
+            return WalletService.getTableRows(table.name, scope);
+        }
+
         ApiService.getTableData("jungle", $contractDeployedTo, table.name, scope);
     }
 </script>

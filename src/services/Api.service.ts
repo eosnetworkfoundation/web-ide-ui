@@ -30,6 +30,12 @@ const deployDebounce = debounce(() => {
     deploying.set(false);
 }, 1000);
 
+let lastZip = null;
+let lastWasm = null;
+let lastAbi = null;
+
+let buildResolver = null;
+
 export default class ApiService {
 
     static setup(){
@@ -50,16 +56,30 @@ export default class ApiService {
                 }
 
                 if(json.type === "build-status"){
+                    lastZip = null;
+                    lastWasm = null;
+                    lastAbi = null;
+
                     if(json.data.success){
                         ConsoleService.prepend(`Build completed successfully!`);
-                        ConsoleService.prepend(`<a class="text-fontHighlight" style="text-decoration: underline;" href="${API_URL}/v1/download/zip/${json.data.data}">DOWNLOAD ZIP</a> | <a class="text-fontHighlight" style="text-decoration: underline;" href="${API_URL}/v1/download/wasm/${json.data.data}">DOWNLOAD WASM</a> | <a class="text-fontHighlight" style="text-decoration: underline;" href="${API_URL}/v1/download/abi/${json.data.data}">DOWNLOAD ABI</a>`);
+                        lastZip = `${API_URL}/v1/download/zip/${json.data.data}`;
+                        lastWasm = `${API_URL}/v1/download/wasm/${json.data.data}`;
+                        lastAbi = `${API_URL}/v1/download/abi/${json.data.data}`;
+                        ConsoleService.prepend(`<a class="text-fontHighlight" style="text-decoration: underline;" href="${lastZip}">DOWNLOAD ZIP</a> | <a class="text-fontHighlight" style="text-decoration: underline;" href="${lastWasm}">DOWNLOAD WASM</a> | <a class="text-fontHighlight" style="text-decoration: underline;" href="${lastAbi}">DOWNLOAD ABI</a>`);
                         ConsoleService.prepend('');
+
+                        if(buildResolver){
+                            buildResolver({wasm:lastWasm, abi:lastAbi});
+                            buildResolver = null;
+                        }
+
                     } else {
                         ConsoleService.prepend(`Build failed!`);
                         ConsoleService.prepend(`Error: ${json.data.data}`);
                         ConsoleService.prepend('');
                     }
 
+                    deployDebounce();
                     buildDebounce();
                     return;
                 }
@@ -80,7 +100,6 @@ export default class ApiService {
                 }
 
                 if(json.type === "deploy-status"){
-                    console.log(json.data)
                     if(json.data.success){
                         contractDeployedTo.set(json.data.data.account);
                         ConsoleService.prepend(`Deployed successfully!`);
@@ -141,7 +160,6 @@ export default class ApiService {
                 if(json.type === "loaded"){
                     try {
                         const loadedProject = JSON.parse(json.data);
-                        console.log(loadedProject);
                         project.set(new Project(loadedProject.id, loadedProject.name, loadedProject.files, loadedProject.selectedFile, loadedProject.openFiles, loadedProject.createdAt));
                     } catch (error) {
                         console.error('Error parsing loaded project:', error);
@@ -185,11 +203,20 @@ export default class ApiService {
         });
     }
 
-    static build(project:Project){
+    static build(project:Project, useResolver = false){
+        let promise = null;
+        if(useResolver){
+            promise = new Promise(r => {
+                buildResolver = r;
+            })
+        }
+
         ConsoleService.prepend(`Building project "${project.name}"...`);
         building.set(true);
         ApiService.sendMessage('build', {id: project.id});
         setTimeout(() => buildDebounce(), 20000)
+
+        if(promise) return promise;
     }
 
     static save(project:Project){

@@ -8,22 +8,49 @@
         availableTables,
         senderAccount,
         contractDeployedTo,
-        building,
+        building, selectedNetwork,
     } from "../stores";
     import InteractableAction from "./InteractableAction.svelte";
     import InteractableTable from "./InteractableTable.svelte";
     import ApiService from "../services/Api.service";
+    import WalletService from "../services/Wallet.service";
+    import ConsoleService from "../services/Console.service";
 
-    let testAction = {
-        name:'test',
-        params:[
-            { type:'name', name:'account' },
-            { type:'uint64_t', name:'id' },
-        ],
-        value:'',
+
+    const jungleTestAccounts = [
+        "testaccounta",
+        "testaccountb",
+        "testaccountc",
+        "testaccountd",
+        "testaccounte",
+    ];
+    let testAccounts = jungleTestAccounts;
+    let tempSenderAccount = testAccounts[0];
+    senderAccount.set(tempSenderAccount);
+
+
+    let _selectedNetwork = $selectedNetwork;
+    let connectedWallet = null;
+    $: isOnMainnet = _selectedNetwork === 'EOS Mainnet';
+    const onChangeNetwork = (e) => {
+        selectedNetwork.set(_selectedNetwork);
+        contractDeployedTo.set(null);
+        availableInteractions.set([]);
+        availableTables.set([]);
+
+        if(isOnMainnet){
+            WalletService.restoreSession().then(restored => {
+                if(restored){
+                    connectWallet();
+                }
+            })
+            testAccounts = [];
+        } else {
+            testAccounts = jungleTestAccounts;
+        }
     }
-
     const deployContract = (build:boolean) => {
+        if(isOnMainnet) return deployToMainnet();
         if($deploying) return;
         if($building) return;
         deploying.set(true);
@@ -31,15 +58,21 @@
         ApiService.deploy($project, build);
     }
 
-    const testAccounts = [
-        "testaccounta",
-        "testaccountb",
-        "testaccountc",
-        "testaccountd",
-        "testaccounte",
-    ];
-    let tempSenderAccount = testAccounts[0];
-    senderAccount.set(tempSenderAccount);
+    const deployToMainnet = async () => {
+        if($deploying) return;
+        if($building) return;
+        deploying.set(true);
+        consoleOpen.set(true);
+        const fileLocations = await ApiService.build($project, true);
+
+        deploying.set(false);
+
+        const abi = await fetch(fileLocations.abi).then(res => res.json());
+        const wasm = await fetch(fileLocations.wasm).then(res => res.arrayBuffer());
+
+        const deployed = await WalletService.deployContract(wasm, abi);
+
+    }
 
     let copiedSender = false;
     const copySenderAccount = () => {
@@ -58,6 +91,23 @@
     const goToContractInExplorer = () => {
         window.open(`https://jungle4.eosq.eosnation.io/account/${$contractDeployedTo}`, '_blank');
     }
+
+    const connectWallet = async () => {
+
+        if(await WalletService.login()) {
+            connectedWallet = WalletService.getConnectedAccount();
+            testAccounts = [connectedWallet];
+            await WalletService.checkIfContractDeployed();
+        }
+    }
+
+    const logout = async () => {
+        await WalletService.logout();
+        connectedWallet = null;
+        contractDeployedTo.set(null);
+        availableInteractions.set([]);
+        availableTables.set([]);
+    }
 </script>
 
 <aside class="flex flex-col bg-sidebarBg text-fontColor cursor-default" style="min-width:{$sidebarWidth}px">
@@ -66,25 +116,41 @@
         <section class="flex-none p-5 pt-0">
             <section class="pt-4">
                 <figure class="tiny-label text-fontColor">ENVIRONMENT</figure>
-                <select class="text-xs rounded bg-inputBg border-inputBorder border py-1 px-2 w-full mt-1">
+                <select bind:value={_selectedNetwork} on:change={onChangeNetwork} class="text-xs rounded bg-inputBg border-inputBorder border py-1 px-2 w-full mt-1">
                     <option>Jungle Testnet</option>
-                    <option disabled>EOS Mainnet</option>
+                    <option>EOS Mainnet</option>
                 </select>
 
                 <!--            <figure class="tiny-label text-fontColor mt-4">CONTRACT ACCOUNT</figure>-->
                 <!--            <input class="text-xs cursor-not-allowed opacity-40 rounded bg-inputBg border-inputBorder border py-1 px-2 w-full mt-1" disabled value={"acc"} />-->
 
-                <figure on:click={() => deployContract(true)} class="mt-2 select-none rounded text-xs border-2 border-fontColor flex justify-start px-3 py-2 items-center
-                {!$deploying && !$building ? 'cursor-pointer' : ''}
-                {$deploying || $building ? 'opacity-30' : ''} {$deploying || $building ? 'opacity-30 cursor-not-allowed animate-pulse text-fontHighlight border-fontHighlight' : ''}
-                  hover:border-fontHighlight hover:text-fontHighlight active:bg-fontColor
-                  active:border-fontColor active:text-fontColorInverted"><i class="fa-solid fa-tools mr-1"></i> <i class="fa-solid fa-rocket-launch mr-3"></i> BUILD & DEPLOY</figure>
+                {#if isOnMainnet && !connectedWallet}
+                    <figure on:click={connectWallet} class="mt-2 select-none rounded text-xs border-2 border-fontColor flex justify-start px-3 py-2 items-center
+                    cursor-pointer
+                      hover:border-fontHighlight hover:text-fontHighlight active:bg-fontColor
+                      active:border-fontColor active:text-fontColorInverted"><i class="fa-solid fa-wallet mr-3"></i> CONNECT WALLET</figure>
+                {/if}
+                {#if isOnMainnet && connectedWallet}
+                    <figure on:click={logout} class="mt-2 select-none rounded text-xs border-2 border-fontColor flex justify-start px-3 py-2 items-center
+                    cursor-pointer
+                      hover:border-fontHighlight hover:text-fontHighlight active:bg-fontColor
+                      active:border-fontColor active:text-fontColorInverted"><i class="fa-solid fa-wallet mr-3"></i> LOG OUT OF {connectedWallet}</figure>
+                {/if}
 
-                <figure on:click={() => deployContract(false)} class="mt-2 select-none rounded text-xs border-2 border-fontColor flex justify-start px-3 py-2 items-center
-                {!$deploying && !$building ? 'cursor-pointer' : ''}
-                {$deploying || $building ? 'opacity-30' : ''} {$deploying || $building ? 'opacity-30 cursor-not-allowed animate-pulse text-fontHighlight border-fontHighlight' : ''}
-                  hover:border-fontHighlight hover:text-fontHighlight active:bg-fontColor
-                  active:border-fontColor active:text-fontColorInverted"><i class="fa-solid fa-rocket-launch mr-3"></i> DEPLOY</figure>
+
+                {#if !isOnMainnet || (isOnMainnet && connectedWallet)}
+                    <figure on:click={() => deployContract(true)} class="mt-2 select-none rounded text-xs border-2 border-fontColor flex justify-start px-3 py-2 items-center
+                    {!$deploying && !$building ? 'cursor-pointer' : ''}
+                    {$deploying || $building ? 'opacity-30' : ''} {$deploying || $building ? 'opacity-30 cursor-not-allowed animate-pulse text-fontHighlight border-fontHighlight' : ''}
+                      hover:border-fontHighlight hover:text-fontHighlight active:bg-fontColor
+                      active:border-fontColor active:text-fontColorInverted"><i class="fa-solid fa-tools mr-1"></i> <i class="fa-solid fa-rocket-launch mr-3"></i> BUILD & DEPLOY</figure>
+                {/if}
+
+<!--                <figure on:click={() => deployContract(false)} class="mt-2 select-none rounded text-xs border-2 border-fontColor flex justify-start px-3 py-2 items-center-->
+<!--                {!$deploying && !$building ? 'cursor-pointer' : ''}-->
+<!--                {$deploying || $building ? 'opacity-30' : ''} {$deploying || $building ? 'opacity-30 cursor-not-allowed animate-pulse text-fontHighlight border-fontHighlight' : ''}-->
+<!--                  hover:border-fontHighlight hover:text-fontHighlight active:bg-fontColor-->
+<!--                  active:border-fontColor active:text-fontColorInverted"><i class="fa-solid fa-rocket-launch mr-3"></i> DEPLOY</figure>-->
 
                 {#if $contractDeployedTo}
                     <figure class="tiny-label text-fontHighlight mt-5">The account the contract is deployed to</figure>
@@ -102,25 +168,27 @@
             </section>
         </section>
 
-        <section class="flex-none">
-            <figure class="h-px bg-fileBarUnselected my-2"></figure>
+        {#if !isOnMainnet}
+            <section class="flex-none">
+                <figure class="h-px bg-fileBarUnselected my-2"></figure>
 
-            <section class="p-5 pb-2 pt-0 mt-3">
-                {#if $availableInteractions.length > 0}
-                    <figure class="tiny-label text-fontHighlight">Select account to send transactions with</figure>
-                    <section class="flex">
-                        <select bind:value={tempSenderAccount} on:change={() => senderAccount.set(tempSenderAccount)} class="text-xs rounded bg-inputBg border-inputBorder border py-1 px-2 w-full mt-1">
-                            {#each testAccounts.concat([$contractDeployedTo]) as account}
-                                <option value={account}>{account}</option>
-                            {/each}
-                        </select>
-                        <figure on:click={copySenderAccount} class="text-xs rounded bg-inputBg border-fontColor border py-1 px-2 mt-1 hover:border-fontHighlight hover:text-fontHighlight active:bg-fontColor active:border-fontColor active:text-fontColorInverted cursor-pointer ml-1">
-                            <i class="fa-solid {copiedSender ? 'fa-check' : 'fa-copy'}"></i>
-                        </figure>
-                    </section>
-                {/if}
+                <section class="p-5 pb-2 pt-0 mt-3">
+                    {#if $availableInteractions.length > 0}
+                        <figure class="tiny-label text-fontHighlight">Select account to send transactions with</figure>
+                        <section class="flex">
+                            <select bind:value={tempSenderAccount} on:change={() => senderAccount.set(tempSenderAccount)} class="text-xs rounded bg-inputBg border-inputBorder border py-1 px-2 w-full mt-1">
+                                {#each testAccounts.concat([$contractDeployedTo]) as account}
+                                    <option value={account}>{account}</option>
+                                {/each}
+                            </select>
+                            <figure on:click={copySenderAccount} class="text-xs rounded bg-inputBg border-fontColor border py-1 px-2 mt-1 hover:border-fontHighlight hover:text-fontHighlight active:bg-fontColor active:border-fontColor active:text-fontColorInverted cursor-pointer ml-1">
+                                <i class="fa-solid {copiedSender ? 'fa-check' : 'fa-copy'}"></i>
+                            </figure>
+                        </section>
+                    {/if}
+                </section>
             </section>
-        </section>
+        {/if}
 
         <section class="flex-auto">
             <figure class="h-px bg-fileBarUnselected my-2"></figure>
