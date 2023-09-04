@@ -102,9 +102,10 @@ export default class WalletService {
             previousCodeSize = (previousCode.wasm.length * 10) + JSON.stringify(previousCode.abi).length;
         }
 
+        const freeRam = parseInt(accountInfo.ram_quota.toString()) - parseInt(accountInfo.ram_usage.toString());
+        const extraRamRequired = estimatedRam - previousCodeSize;
 
-        const ramRequired = estimatedRam - previousCodeSize;
-        // const ramRequired = 0;
+        const ramRequired = freeRam > extraRamRequired ? 0 : extraRamRequired - freeRam;
 
         let actions = [{
             account: 'eosio',
