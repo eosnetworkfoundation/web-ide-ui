@@ -74,7 +74,7 @@ export default class WalletService {
     }
 
     static async deployContract(wasm, abi) {
-        const estimatedRam = wasm.byteLength * 10;
+        const estimatedRam = (wasm.byteLength * 10) + JSON.stringify(abi).length;
 
         const accountInfo = await session.client.v1.chain.get_account(session.actor).catch(err => {
             console.error(err);
@@ -83,9 +83,27 @@ export default class WalletService {
             };
         });
 
+        let previousCodeSize = 0;
+        if(accountInfo.last_code_update !== '1970-01-01T00:00:00.000'){
+            const previousCode = await fetch(`https://eos.greymass.com/v1/chain/get_code`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    account_name: session.actor.toString(),
+                    code_as_wasm: true,
+                }),
+            }).then(x => x.json()).catch(err => {
+                console.error(err);
+                return {
+                    code_hash: '',
+                    wasm: '',
+                    abi: {},
+                };
+            });
+            previousCodeSize = (previousCode.wasm.length * 10) + JSON.stringify(previousCode.abi).length;
+        }
 
-        const ramOwned = parseInt(accountInfo.ram_quota.toString());
-        const ramRequired = ramOwned - estimatedRam;
+
+        const ramRequired = estimatedRam - previousCodeSize;
         // const ramRequired = 0;
 
         let actions = [{
