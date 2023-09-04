@@ -74,7 +74,7 @@ export default class WalletService {
     }
 
     static async deployContract(wasm, abi) {
-        const estimatedRam = (((wasm.byteLength/2) * 10) + 100) * 2.4;
+        const estimatedRam = wasm.byteLength * 10;
 
         const accountInfo = await session.client.v1.chain.get_account(session.actor).catch(err => {
             console.error(err);
@@ -83,8 +83,9 @@ export default class WalletService {
             };
         });
 
+
         const ramOwned = parseInt(accountInfo.ram_quota.toString());
-        const ramRequired = estimatedRam - ramOwned;
+        const ramRequired = ramOwned - estimatedRam;
         // const ramRequired = 0;
 
         let actions = [{
