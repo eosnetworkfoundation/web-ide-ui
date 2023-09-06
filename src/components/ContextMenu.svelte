@@ -13,7 +13,7 @@
 
 {#if $contextMenu}
     {#key $contextMenu}
-        <section id="context-menu" style="left:{$contextMenu.x}px; top:{$contextMenu.y}px;" class="p-1 bg-contextMenuBg drop-shadow-xl z-30 absolute rounded">
+        <section id="context-menu" style="left:{$contextMenu.x}px; top:{$contextMenu.y}px;" class="p-1 bg-contextMenuBg text-fontColor drop-shadow-xl z-30 absolute rounded">
             {#each menuItems as item}
                 {#if item.type === "item"}
                     <div class="rounded p-2 px-4 hover:bg-contextMenuItemHover cursor-pointer text-xs" on:click={item.function}>

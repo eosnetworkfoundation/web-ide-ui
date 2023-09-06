@@ -5,17 +5,10 @@ export const starterProject:Array<ProjectFile> = [
     new ProjectFile("contract.cpp", "", `#include <eosio/eosio.hpp>
 using namespace eosio;
 
-// Welcome to your new EOS Smart Contract.
-// If you're just learning follow our Getting Started guide here:
-// https://docs.eosnetwork.com/docs/latest/smart-contracts/getting-started/smart_contract_basics
-
 CONTRACT mycontract : public contract {
    public:
       using contract::contract;
 
-      /********************************************/
-      /*             DATA AND STORAGE             */
-      /********************************************/
       // This is a database model definition
       TABLE user {
          name     eos_account;
@@ -29,10 +22,6 @@ CONTRACT mycontract : public contract {
       // This is a table constructor which we will instantiate later
       using user_table = eosio::multi_index<"users"_n, user>;
 
-
-      /********************************************/
-      /*             CALLABLE ACTIONS             */
-      /********************************************/
       // Every ACTION you define can be called from outside the blockchain
       ACTION newuser( name eos_account ){
          // Only the account calling this can add themselves
