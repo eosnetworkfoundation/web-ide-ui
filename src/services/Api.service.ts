@@ -132,8 +132,7 @@ export default class ApiService {
                 if(json.type === "interaction-status"){
                     if(json.data.success){
                         ConsoleService.prepend(`Interaction success!`);
-                        console.log(json.data);
-                        ConsoleService.prepend(`<details><summary>Transaction: <a class="text-fontHighlight" style="color:text-decoration: underline;" href="https://jungle4.eosq.eosnation.io/tx/${json.data.data.transaction_id}" target="_blank">See transaction on explorer</a></summary><pre>${JSON.stringify(json.data.data, null, 4)}</pre></details>`);
+                        ConsoleService.prepend(`<details><summary>Transaction: <a class="text-fontHighlight" style="color:text-decoration: underline;" href="https://jungle4.eosq.eosnation.io/tx/${json.data.data.response.transaction_id}" target="_blank">See transaction on explorer</a></summary><pre>${JSON.stringify(json.data.data, null, 4)}</pre></details>`);
                         ConsoleService.prepend('');
                     } else {
                         ConsoleService.prepend(`Interaction failed!`);
