@@ -5,7 +5,7 @@
 
     export let action;
 
-    $: isOnMainnet = $selectedNetwork === "EOS Mainnet";
+    $: isOnMainnet = $selectedNetwork === "Use Wallet";
 
     const interact = async () => {
         consoleOpen.set(true);

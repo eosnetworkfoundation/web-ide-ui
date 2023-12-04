@@ -9,7 +9,7 @@
         scope = value;
     });
 
-    $: isOnMainnet = $selectedNetwork === "EOS Mainnet";
+    $: isOnMainnet = $selectedNetwork === "Use Wallet";
 
     const get = async () => {
         consoleOpen.set(true);

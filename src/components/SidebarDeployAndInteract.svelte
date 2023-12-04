@@ -31,7 +31,7 @@
 
     let _selectedNetwork = $selectedNetwork;
     let connectedWallet = null;
-    $: isOnMainnet = _selectedNetwork === 'EOS Mainnet';
+    $: isOnMainnet = _selectedNetwork === 'Use Wallet';
     const onChangeNetwork = (e) => {
         selectedNetwork.set(_selectedNetwork);
         contractDeployedTo.set(null);
@@ -118,7 +118,7 @@
                 <figure class="tiny-label text-fontColor">ENVIRONMENT</figure>
                 <select bind:value={_selectedNetwork} on:change={onChangeNetwork} class="text-xs rounded bg-inputBg border-inputBorder border py-1 px-2 w-full mt-1">
                     <option>Jungle Testnet</option>
-                    <option>EOS Mainnet</option>
+                    <option>Use Wallet</option>
                 </select>
 
                 <!--            <figure class="tiny-label text-fontColor mt-4">CONTRACT ACCOUNT</figure>-->

@@ -25,10 +25,10 @@
     "vite": "^4.2.0"
   },
   "dependencies": {
-    "@wharfkit/session": "^1.0.0",
-    "@wharfkit/transact-plugin-resource-provider": "^1.0.0",
-    "@wharfkit/wallet-plugin-anchor": "^1.0.0",
-    "@wharfkit/web-renderer": "^1.0.2",
+    "@wharfkit/session": "^1.2.1",
+    "@wharfkit/transact-plugin-resource-provider": "^1.1.0",
+    "@wharfkit/wallet-plugin-anchor": "^1.1.0",
+    "@wharfkit/web-renderer": "^1.1.1",
     "debounce": "^1.2.1",
     "flowbite-svelte": "^0.34.7",
     "monaco-editor": "^0.37.0",
