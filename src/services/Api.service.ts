@@ -65,7 +65,25 @@ export default class ApiService {
                         lastZip = `${API_URL}/v1/download/zip/${json.data.data}`;
                         lastWasm = `${API_URL}/v1/download/wasm/${json.data.data}`;
                         lastAbi = `${API_URL}/v1/download/abi/${json.data.data}`;
-                        ConsoleService.prepend(`<a class="text-fontHighlight" style="text-decoration: underline;" href="${lastZip}">DOWNLOAD ZIP</a> | <a class="text-fontHighlight" style="text-decoration: underline;" href="${lastWasm}">DOWNLOAD WASM</a> | <a class="text-fontHighlight" style="text-decoration: underline;" href="${lastAbi}">DOWNLOAD ABI</a>`);
+                        ConsoleService.prepend(`<a class="text-fontHighlight" style="text-decoration: underline;" href="${lastZip}">DOWNLOAD ZIP</a>`);
+
+                        project.update((project) => {
+
+                            const hasMultipleCppFiles = project.files.filter(file => file.name.endsWith('.cpp')).length > 1;
+                            const deployableContracts = project.files.filter(file => {
+                                if(!hasMultipleCppFiles) return file.name.endsWith('.cpp');
+                                return file.name.endsWith('entry.cpp');
+                            });
+
+                            for(let contract of deployableContracts){
+                                const contractName = contract.name.replace('.entry.cpp', '').replace('.cpp', '')
+                                ConsoleService.prepend(`Contract: ${contract.name} | <a class="text-fontHighlight" style="text-decoration: underline;" href="${lastWasm}/${contractName}">DOWNLOAD WASM</a> | <a class="text-fontHighlight" style="text-decoration: underline;" href="${lastAbi}/${contractName}">DOWNLOAD ABI</a>`);
+                            }
+
+
+                            return project;
+                        });
+
                         ConsoleService.prepend('');
 
                         if(buildResolver){
@@ -224,13 +242,13 @@ export default class ApiService {
         setTimeout(() => saveDebounce(), 5000);
     }
 
-    static deploy(project:Project, build:boolean = true){
+    static deploy(project:Project, contract:string, build:boolean = true){
         if(!build) ConsoleService.prepend(`Deploying contract to Jungle Testnet...`);
         else ConsoleService.prepend(`Building and deploying contract to Jungle Testnet...`);
 
         if(build) building.set(true);
 
-        ApiService.sendMessage('deploy', {network:'jungle', id:project.id, build});
+        ApiService.sendMessage('deploy', {network:'jungle', id:project.id, contract, build});
         setTimeout(() => deployDebounce(), 20000);
         if(build) setTimeout(() => buildDebounce(), 20000);
     }

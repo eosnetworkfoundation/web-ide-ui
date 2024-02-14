@@ -9,12 +9,13 @@
         senderAccount,
         contractDeployedTo,
         building, selectedNetwork,
+        selectedContract,
     } from "../stores";
     import InteractableAction from "./InteractableAction.svelte";
     import InteractableTable from "./InteractableTable.svelte";
     import ApiService from "../services/Api.service";
     import WalletService from "../services/Wallet.service";
-    import ConsoleService from "../services/Console.service";
+    import {onMount} from "svelte";
 
 
     const jungleTestAccounts = [
@@ -55,7 +56,7 @@
         if($building) return;
         deploying.set(true);
         consoleOpen.set(true);
-        ApiService.deploy($project, build);
+        ApiService.deploy($project, $selectedContract, build);
     }
 
     const deployToMainnet = async () => {
@@ -108,6 +109,22 @@
         availableInteractions.set([]);
         availableTables.set([]);
     }
+
+    $: hasMultipleCppFiles = $project.files.filter(file => file.name.endsWith('.cpp')).length > 1;
+    $: deployableContracts = $project.files.filter(file => {
+        if(!hasMultipleCppFiles) return file.name.endsWith('.cpp');
+        return file.name.endsWith('entry.cpp');
+    })
+    const onChangeContract = (e) => {
+        selectedContract.set(e.target.value);
+    }
+
+    onMount(() => {
+        if(deployableContracts.length) selectedContract.set(deployableContracts[0].name);
+
+        console.log('selectedContract', $selectedContract);
+
+    });
 </script>
 
 <aside class="flex flex-col bg-sidebarBg text-fontColor cursor-default" style="min-width:{$sidebarWidth}px">
@@ -137,6 +154,16 @@
                       active:border-fontColor active:text-fontColorInverted"><i class="fa-solid fa-wallet mr-3"></i> LOG OUT OF {connectedWallet}</figure>
                 {/if}
 
+
+
+                {#if deployableContracts.length > 1}
+                    <figure class="tiny-label text-fontColor mt-4">SELECT CONTRACT TO DEPLOY</figure>
+                    <select bind:value={$selectedContract} on:change={onChangeContract} class="text-xs rounded bg-inputBg border-inputBorder border py-1 px-2 w-full mt-1">
+                        {#each deployableContracts as contract}
+                            <option value={contract.name}>{contract.name}</option>
+                        {/each}
+                    </select>
+                {/if}
 
                 {#if !isOnMainnet || (isOnMainnet && connectedWallet)}
                     <figure on:click={() => deployContract(true)} class="mt-2 select-none rounded text-xs border-2 border-fontColor flex justify-start px-3 py-2 items-center
