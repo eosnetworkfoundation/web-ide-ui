@@ -224,13 +224,13 @@ export default class ApiService {
         setTimeout(() => saveDebounce(), 5000);
     }
 
-    static deploy(project:Project, build:boolean = true){
+    static deploy(project:Project, contract:string, build:boolean = true){
         if(!build) ConsoleService.prepend(`Deploying contract to Jungle Testnet...`);
         else ConsoleService.prepend(`Building and deploying contract to Jungle Testnet...`);
 
         if(build) building.set(true);
 
-        ApiService.sendMessage('deploy', {network:'jungle', id:project.id, build});
+        ApiService.sendMessage('deploy', {network:'jungle', id:project.id, contract, build});
         setTimeout(() => deployDebounce(), 20000);
         if(build) setTimeout(() => buildDebounce(), 20000);
     }

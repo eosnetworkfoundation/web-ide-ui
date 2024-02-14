@@ -20,6 +20,7 @@ export const availableInteractions:Writable<Array<{name:string, params:Array<{na
 export const availableTables:Writable<Array<{name:string}>> = writable([]);
 export const editor:Writable<any> = writable(null);
 export const selectedNetwork:Writable<string> = writable("Jungle Testnet");
+export const selectedContract:Writable<string> = writable("");
 
 // UI SETTINGS
 export const sidebarWidth:Writable<number> = writable(300);
