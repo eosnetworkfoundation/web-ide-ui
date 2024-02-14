@@ -26,7 +26,7 @@
         <section class="w-96 z-10 p-5 bg-contextMenuBg text-fontColor rounded drop-shadow-xl">
             <h1 class="text-lg">{$dialogBox.title}</h1>
             {#if $dialogBox.placeholder}
-                <input style="border-width: 1px;" class="outline-0 w-full mt-4 p-2 rounded bg-contextMenuBg text-fontColor border-fontColor" type="text" bind:value placeholder={$dialogBox.placeholder} />
+                <input id="dialog-input" style="border-width: 1px;" class="outline-0 w-full mt-4 p-2 rounded bg-contextMenuBg text-fontColor border-fontColor" type="text" bind:value placeholder={$dialogBox.placeholder} />
             {/if}
             {#if $dialogBox.error}
                 <figure class="text-xs text-yellow-500 mt-2 font-bold">

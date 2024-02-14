@@ -75,18 +75,19 @@ export const createNewFile = () => {
             return;
         }
 
-        if(!(/^[\w,\s-]+\.[A-Za-z0-9]{3}$/.test(value))){
-            dialogBox.update(x => {
-                x.error = 'Invalid filename';
-                return x;
-            });
-            return;
-        }
+
+        // if(!(/^[\w,\s-]+\.[A-Za-z0-9]{3}$/.test(value))){
+        //     dialogBox.update(x => {
+        //         x.error = 'Invalid filename';
+        //         return x;
+        //     });
+        //     return;
+        // }
 
         dialogBox.set(null);
 
         project.update(_project => {
-            _project.files.push(new ProjectFile(value, file.path, ''));
+            _project.files.push(new ProjectFile(value, file ? file.path : "", ''));
             ApiService.save(_project);
             return _project;
         });
@@ -123,6 +124,30 @@ export const createNewFolder = () => {
     });
 }
 
+
+
+export const renameFile = () => {
+    const file = getFileFromContextMenu();
+    contextMenu.set(null);
+
+    openDialog('Rename file', 'Enter a new filename', (value:string|null) => {
+        if(!value) {
+            dialogBox.set(null);
+            return;
+        }
+
+        dialogBox.set(null);
+
+        project.update(_project => {
+            _project.files = _project.files.map(x => {
+                if(x.id === file.id) x.name = value;
+                return x;
+            });
+            ApiService.save(_project);
+            return _project;
+        });
+    });
+}
 export const deleteFile = () => {
     const file = getFileFromContextMenu();
 
@@ -158,6 +183,12 @@ export const deleteFile = () => {
 
 export const openDialog = (title:string, placeholder:string, callback:(value:string|null) => void) => {
     dialogBox.set({title, placeholder, callback, error:null});
+
+    // highlight input if exists
+    setTimeout(() => {
+        const input = document.getElementById('dialog-input');
+        if(input) input.focus();
+    }, 10);
 }
 
 

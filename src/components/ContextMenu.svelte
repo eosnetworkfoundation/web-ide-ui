@@ -1,11 +1,12 @@
 <script>
-    import {contextMenu, createNewFolder, createNewFile, deleteFile} from "../stores";
+    import {contextMenu, createNewFolder, createNewFile, deleteFile, renameFile} from "../stores";
 
     export let menuItems = [
         { type:"item", name:"New File", function:createNewFile, icon:'fa-solid fa-file-circle-plus' },
         { type:"item", name:"New Folder", function:createNewFolder, icon:'fa-solid fa-folder-open' },
         { type:"divider" },
-        { type: "item", name:"Delete", function:deleteFile, icon:'fa-solid fa-file-xmark' }
+        { type: "item", name:"Delete", function:deleteFile, icon:'fa-solid fa-file-xmark' },
+        { type: "item", name:"Rename", function:renameFile, icon:'fa-solid fa-file-signature' },
     ];
 
 
