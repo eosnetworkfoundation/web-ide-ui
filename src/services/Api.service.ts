@@ -65,7 +65,25 @@ export default class ApiService {
                         lastZip = `${API_URL}/v1/download/zip/${json.data.data}`;
                         lastWasm = `${API_URL}/v1/download/wasm/${json.data.data}`;
                         lastAbi = `${API_URL}/v1/download/abi/${json.data.data}`;
-                        ConsoleService.prepend(`<a class="text-fontHighlight" style="text-decoration: underline;" href="${lastZip}">DOWNLOAD ZIP</a> | <a class="text-fontHighlight" style="text-decoration: underline;" href="${lastWasm}">DOWNLOAD WASM</a> | <a class="text-fontHighlight" style="text-decoration: underline;" href="${lastAbi}">DOWNLOAD ABI</a>`);
+                        ConsoleService.prepend(`<a class="text-fontHighlight" style="text-decoration: underline;" href="${lastZip}">DOWNLOAD ZIP</a>`);
+
+                        project.update((project) => {
+
+                            const hasMultipleCppFiles = project.files.filter(file => file.name.endsWith('.cpp')).length > 1;
+                            const deployableContracts = project.files.filter(file => {
+                                if(!hasMultipleCppFiles) return file.name.endsWith('.cpp');
+                                return file.name.endsWith('entry.cpp');
+                            });
+
+                            for(let contract of deployableContracts){
+                                const contractName = contract.name.replace('.entry.cpp', '').replace('.cpp', '')
+                                ConsoleService.prepend(`Contract: ${contract.name} | <a class="text-fontHighlight" style="text-decoration: underline;" href="${lastWasm}/${contractName}">DOWNLOAD WASM</a> | <a class="text-fontHighlight" style="text-decoration: underline;" href="${lastAbi}/${contractName}">DOWNLOAD ABI</a>`);
+                            }
+
+
+                            return project;
+                        });
+
                         ConsoleService.prepend('');
 
                         if(buildResolver){
