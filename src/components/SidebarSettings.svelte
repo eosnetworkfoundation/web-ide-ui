@@ -48,7 +48,7 @@
 <!--                  hover:border-fontHighlight hover:text-fontHighlight active:bg-fontColor-->
 <!--                  active:border-fontColor active:text-fontColorInverted"><i class="fa-brands fa-github mr-3"></i> CREATE PROJECT FROM REPO</figure>-->
 
-            <!-- made with love -->
+            <!-- removal of this will break license -->
             <figure class="mt-5 text-xs opacity-50">Made with <i class="fa-solid fa-heart text-red-500"></i> by <b class="text-blue-500">EOS Network Foundation</b></figure>
         </section>
 
