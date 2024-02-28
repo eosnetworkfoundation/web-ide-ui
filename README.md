@@ -14,3 +14,10 @@ Steps to run this project locally:
 yarn
 yarn dev
 ```
+
+## Setting up firebase
+
+This project uses firebase for authentication.
+
+Create a project and copy the config to `src/utils/firebase`.
+Then copy the firestore rules in that file to your firestore rules in the firebase console (if you don't anyone can read/write to your database). 
