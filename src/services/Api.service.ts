@@ -12,6 +12,7 @@ import Project from "../models/Project.model";
 import debounce from 'debounce';
 import ConsoleService from "./Console.service";
 import {starterProject} from "../data/starterProject";
+import {saveNewProject} from "../utils/firebase";
 
 const WS_URL:string = import.meta.env.VITE_API_WS_URL.replace(/\/$/, "");
 const API_URL:string = import.meta.env.VITE_API_HTTP_URL.replace(/\/$/, "");
@@ -164,13 +165,22 @@ export default class ApiService {
 
                 if(json.type === "saved"){
                     project.update((project) => {
+
                         if(project.id != json.data) {
                             project.id = json.data;
                         }
+
+                        setTimeout(async () => {
+                            await saveNewProject(project.id, project.name);
+                        }, 1);
+
                         return project;
                     });
                     const queryUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?id=${json.data}`;
                     window.history.pushState({path:queryUrl},'',queryUrl);
+
+
+
                     saveDebounce();
                     return;
                 }
