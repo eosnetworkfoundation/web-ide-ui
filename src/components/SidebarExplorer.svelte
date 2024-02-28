@@ -55,7 +55,7 @@
 
 <aside on:contextmenu|preventDefault={e => contextMenuRightClick(e, rootTree.files[0])} id="sidebar" class="flex flex-col bg-sidebarBg h-full text-fontColor cursor-default" style="min-width:{$sidebarWidth}px">
     <!-- FILE EXPLORER -->
-    <figure class="text-xs font-medium opacity-30 p-5 pb-1">{$project.name.toUpperCase()}</figure>
+    <figure class="text-xs font-medium opacity-30 p-5 pb-1 truncate max-w-[300px]">{$project.name.toUpperCase()}</figure>
     <section class="flex-auto overflow-y-auto p-5 pt-0">
         <section id="project" class="pt-4">
             <SidebarDirectory directoryTree={directoriesTree} />

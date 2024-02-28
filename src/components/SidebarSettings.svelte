@@ -48,6 +48,8 @@
 <!--                  hover:border-fontHighlight hover:text-fontHighlight active:bg-fontColor-->
 <!--                  active:border-fontColor active:text-fontColorInverted"><i class="fa-brands fa-github mr-3"></i> CREATE PROJECT FROM REPO</figure>-->
 
+            <!-- made with love -->
+            <figure class="mt-5 text-xs opacity-50">Made with <i class="fa-solid fa-heart text-red-500"></i> by <a href="" class="text-blue-500">Siddharth</a></figure>
         </section>
 
 

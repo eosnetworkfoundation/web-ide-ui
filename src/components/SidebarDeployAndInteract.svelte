@@ -121,9 +121,6 @@
 
     onMount(() => {
         if(deployableContracts.length) selectedContract.set(deployableContracts[0].name);
-
-        console.log('selectedContract', $selectedContract);
-
     });
 </script>
 

@@ -30,6 +30,7 @@
     "@wharfkit/wallet-plugin-anchor": "^1.1.0",
     "@wharfkit/web-renderer": "^1.1.1",
     "debounce": "^1.2.1",
+    "firebase": "^10.8.0",
     "flowbite-svelte": "^0.34.7",
     "monaco-editor": "^0.37.0",
     "uuidv4": "^6.2.13"

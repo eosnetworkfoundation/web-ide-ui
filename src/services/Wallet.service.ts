@@ -85,7 +85,6 @@ export default class WalletService {
 
         let previousCodeSize = 0;
         if(accountInfo.last_code_update !== '1970-01-01T00:00:00.000'){
-            console.log('hi', session.chain.url);
             const previousCode = await fetch(`${session.chain.url}/v1/chain/get_code`, {
                 method: 'POST',
                 body: JSON.stringify({

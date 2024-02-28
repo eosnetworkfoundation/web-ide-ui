@@ -25,6 +25,8 @@
   import SidebarSettings from "./components/SidebarSettings.svelte";
   import {getIcon} from "./utils/icons";
   import {theme} from "./theme";
+  import UserPopup from "./components/UserPopup.svelte";
+  import {showUserPopup} from "./stores/stores";
 
   onMount(async () => {
     await ApiService.setup();
@@ -43,9 +45,6 @@
     return projectFile.name;
   }
 
-  document.addEventListener("keydown", e => { if(e.key === "F12") e.preventDefault() });
-  document.addEventListener("keyup", e => { if(e.key === "F12") consoleOpen.set(!$consoleOpen); });
-
   const closeFileOnMiddleClick = (e:MouseEvent, id:string) => {
     if(e.button === 1) closeFile(id);
   }
@@ -61,6 +60,9 @@
   <Navbar />
   <DialogBox />
   <ContextMenu />
+  {#if $showUserPopup}
+    <UserPopup />
+  {/if}
 
   <!-- PAGE -->
   <section id="page" class="flex" style="height:calc(100% - 48px)">
