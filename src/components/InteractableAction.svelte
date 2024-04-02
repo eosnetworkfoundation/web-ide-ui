@@ -13,7 +13,11 @@
         const actionData = {
             action: action.name,
             params: action.params.reduce((acc, param) => {
-                acc[param.name] = param.value;
+                try {
+                    acc[param.name] = JSON.parse(param.value);
+                } catch(e){
+                    acc[param.name] = param.value;
+                }
                 return acc;
             }, {})
         };
