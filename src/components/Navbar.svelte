@@ -40,7 +40,7 @@
   <div class="flex flex-row h-full w-full">
     <!-- Left side -->
     <div class="flex flex-row h-full w-1/3 pl-5 items-center justify-start">
-      <figure id="logo" class="fill-fontColorNavbar">
+      <figure id="logo" class="fill-fontColorNavbar max-w-[36px] pl-2">
         <Logo />
       </figure>
     </div>

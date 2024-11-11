@@ -130,8 +130,8 @@
 
 <style lang="scss">
   #code-logo {
-    width:800px;
-    opacity:0.1;
+    width:600px;
+    opacity:0.04;
     z-index:2;
     pointer-events: none;
   }
