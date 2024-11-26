@@ -75,6 +75,22 @@
 
     }
 
+    let addingCodePermission = false;
+    const addCodePermission = async () => {
+        try {
+            if(addingCodePermission) return;
+            addingCodePermission = true;
+            consoleOpen.set(true);
+
+            const added = await WalletService.addCodePermissions();
+
+        } catch (e) {
+            console.error(e);
+        } finally {
+            addingCodePermission = false;
+        }
+    }
+
     let copiedSender = false;
     const copySenderAccount = () => {
         copiedSender = true;
@@ -168,6 +184,14 @@
                     {$deploying || $building ? 'opacity-30' : ''} {$deploying || $building ? 'opacity-30 cursor-not-allowed animate-pulse text-fontHighlight border-fontHighlight' : ''}
                       hover:border-fontHighlight hover:text-fontHighlight active:bg-fontColor
                       active:border-fontColor active:text-fontColorInverted"><i class="fa-solid fa-tools mr-1"></i> <i class="fa-solid fa-rocket-launch mr-3"></i> BUILD & DEPLOY</figure>
+                {/if}
+
+                {#if !isOnMainnet || (isOnMainnet && connectedWallet)}
+                    <figure on:click={addCodePermission} class="mt-2 select-none rounded text-xs border-2 border-fontColor flex justify-start px-3 py-2 items-center
+                    {!addingCodePermission ? 'cursor-pointer' : ''}
+                    {addingCodePermission ? 'opacity-30' : ''} {addingCodePermission ? 'opacity-30 cursor-not-allowed animate-pulse text-fontHighlight border-fontHighlight' : ''}
+                      hover:border-fontHighlight hover:text-fontHighlight active:bg-fontColor
+                      active:border-fontColor active:text-fontColorInverted"><i class="fa-solid fa-code mr-3"></i> ADD CODE PERMISSION</figure>
                 {/if}
 
 <!--                <figure on:click={() => deployContract(false)} class="mt-2 select-none rounded text-xs border-2 border-fontColor flex justify-start px-3 py-2 items-center-->

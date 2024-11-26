@@ -73,6 +73,52 @@ export default class WalletService {
         return !!session;
     }
 
+    static async addCodePermissions(){
+        const currentPermissions = await session.client.v1.chain.get_account(session.actor).catch(err => {
+            console.error(err);
+            return null;
+        });
+
+        const activePerms = currentPermissions.permissions.find((perm:any) => perm.perm_name.toString() === 'active');
+        if(!activePerms){
+            alert('Active permission not found');
+            return false;
+        }
+
+        const codePermission = activePerms.required_auth.accounts.find((account:any) => account.permission.permission.toString() === 'eosio.code');
+        if(codePermission){
+            alert('Code permission already exists');
+            return false;
+        }
+
+        activePerms.required_auth.accounts.push({
+            permission: {
+                actor: session.actor.toString(),
+                permission: 'eosio.code'
+            },
+            weight: 1
+        });
+
+        const actions = [{
+            account: 'eosio',
+            name: 'updateauth',
+            authorization: [session.permissionLevel],
+            data: {
+                account: session.actor,
+                permission: 'active',
+                parent: 'owner',
+                auth: activePerms.required_auth
+            },
+        }];
+
+        return await session.transact({ actions }).then(x => {
+            return true;
+        }).catch(err => {
+            console.error(err);
+            return false;
+        })
+    }
+
     static async deployContract(wasm, abi) {
         const estimatedRam = (wasm.byteLength * 10) + JSON.stringify(abi).length;
 
